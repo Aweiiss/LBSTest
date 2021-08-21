@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,21 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView positionText;
 
-    /*StringBuilder currentPosition;
-    private static final int UPDATE_TEXT = 1;
-
-    private Handler handler = new Handler(){
-        public void handleMessage(Message msg){
-            switch (msg.what){
-                case UPDATE_TEXT:
-                    positionText.setText(currentPosition);
-                    currentPosition.delete(0,currentPosition.length());
-                    break;
-                default:
-                    break;
-            }
-        }
-    };*/
 
 
     @Override
@@ -52,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient = new LocationClient(getApplicationContext());
         mLocationClient.registerLocationListener(new MyLocationListener());
         setContentView(R.layout.activity_main);
+        Button button = (Button) findViewById(R.id.send);
+
         positionText = (TextView) findViewById(R.id.position_text_view);
         List<String> permissionList = new ArrayList<>();
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED) {
@@ -67,9 +56,14 @@ public class MainActivity extends AppCompatActivity {
             String [] permissions = permissionList.toArray(new String[permissionList.size()]);
             ActivityCompat.requestPermissions(MainActivity.this,permissions,1);
         } else {
-            requestLocation();
-        }
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    requestLocation();
+                }
+            });
 
+        }
 
     }
 
@@ -114,18 +108,6 @@ public class MainActivity extends AppCompatActivity {
     public class MyLocationListener implements BDLocationListener{
         @Override
         public void onReceiveLocation(BDLocation location) {
-            /*currentPosition = new StringBuilder();
-            currentPosition.append("纬度：").append(location.getLatitude()).append("\n");
-            currentPosition.append("经线：").append(location.getLongitude()).append("\n");
-            currentPosition.append("定位方式：");
-            if (location.getLocType() == BDLocation.TypeGpsLocation) {
-                currentPosition.append("GPS");
-            } else if (location.getLocType() == BDLocation.TypeNetWorkException) {
-                currentPosition.append("网络");
-            }
-            Message message = new Message();
-            message.what = UPDATE_TEXT;
-            handler.sendMessage(message);*/
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
