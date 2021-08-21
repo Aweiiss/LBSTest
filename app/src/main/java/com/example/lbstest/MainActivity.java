@@ -31,6 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView positionText;
 
+    private TextView positionTextGPS;
+
+    StringBuilder currentPosition;
+
 
 
     @Override
@@ -40,8 +44,13 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient.registerLocationListener(new MyLocationListener());
         setContentView(R.layout.activity_main);
         Button button = (Button) findViewById(R.id.send);
+        Button button1 = (Button) findViewById(R.id.GPS);
 
         positionText = (TextView) findViewById(R.id.position_text_view);
+
+        //监听GPS按钮
+        positionTextGPS = (TextView) findViewById(R.id.position_text_view_GPS);
+
         List<String> permissionList = new ArrayList<>();
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED) {
             permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -63,6 +72,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            //实现GPS方式定位
+            button1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    requestLocationGPS();
+                    positionTextGPS.setText(currentPosition);
+                }
+            });
         }
 
     }
@@ -72,7 +89,20 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient.start();
     }
 
+    private void requestLocationGPS(){
+        initLocationGPS();
+        mLocationClient.start();
+    }
+
     private void initLocation() {
+        LocationClientOption option = new LocationClientOption();
+        option.setScanSpan(500);
+        option.setIsNeedAddress(true);
+        //option.setLocationMode(LocationClientOption.LocationMode.Device_Sensors);
+        mLocationClient.setLocOption(option);
+    }
+
+    private void initLocationGPS(){
         LocationClientOption option = new LocationClientOption();
         option.setScanSpan(500);
         option.setLocationMode(LocationClientOption.LocationMode.Device_Sensors);
@@ -106,22 +136,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     public class MyLocationListener implements BDLocationListener{
         @Override
         public void onReceiveLocation(BDLocation location) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    StringBuilder curentPosition = new StringBuilder();
-                    curentPosition.append("纬度：").append(location.getLatitude()).append("\n");
-                    curentPosition.append("经线：").append(location.getLongitude()).append("\n");
-                    curentPosition.append("定位方式：");
+                    currentPosition = new StringBuilder();
+                    currentPosition.append("纬度：").append(location.getLatitude()).append("\n");
+                    currentPosition.append("经线：").append(location.getLongitude()).append("\n");
+                    currentPosition.append("国家：").append(location.getCountry()).append("\n");
+                    currentPosition.append("省：").append(location.getProvince()).append("\n");
+                    currentPosition.append("市：").append(location.getCity()).append("\n");
+                    currentPosition.append("区：").append(location.getDistrict()).append("\n");
+                    currentPosition.append("街道：").append(location.getStreet()).append("\n");
+                    currentPosition.append("定位方式：");
                     if (location.getLocType() == BDLocation.TypeGpsLocation) {
-                        curentPosition.append("GPS");
+                        currentPosition.append("GPS");
                     } else if (location.getLocType() == BDLocation.TypeNetWorkException) {
-                        curentPosition.append("网络");
+                        currentPosition.append("网络");
                     }
-                    positionText.setText(curentPosition);
+                    positionText.setText(currentPosition);
                 }
             });
         }
